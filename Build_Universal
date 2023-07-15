@@ -1,0 +1,103 @@
+import teilchen.behavior.*;
+import teilchen.*;
+import teilchen.test.*;
+import teilchen.util.*;
+import teilchen.integration.*;
+import teilchen.examples.*;
+import teilchen.cubicle.*;
+import teilchen.force.*;
+import teilchen.wip.*;
+import teilchen.constraint.*;
+
+Physics mPhysics;
+
+Particle mParticle;
+
+int W = 1280;
+int H = 720;
+byte FPS = 60;
+final float mDeltaTime = 1.0f / FPS;
+float a = 0;
+float i = 0;
+float j = 0;
+float k = 0;
+
+void settings()
+{
+  size(W,H,P3D);
+}
+
+void setup()
+{
+  background(0);
+  frameRate(FPS);
+  mPhysics = new Physics();
+  mParticle = mPhysics.makeParticle();
+}
+
+void draw()
+{
+  translate(W/2,H/2,a/PI);
+  scale(a/FPS);
+  mPhysics.step(mDeltaTime);
+  
+  a -= .01*FPS;
+  mParticle.position().x += sin(a);
+  mParticle.position().y += cos(a+a);
+  mParticle.position().z -= tan(a*a);
+  if(a<=-360)
+  {a=360;}
+  
+  for(i=-.1; i<.1; i++)
+  {
+    for(j=-.1; j<.1; j++)
+    {
+      for(k=-.1; k<.1; k-=a)
+      {
+        C(-mParticle.position().x,-mParticle.position().y,-mParticle.position().z);
+        C(-mParticle.position().x,mParticle.position().y,-mParticle.position().z);
+        C(mParticle.position().x,-mParticle.position().y,-mParticle.position().z);
+        C(mParticle.position().x,mParticle.position().y,-mParticle.position().z);
+        
+        C(-mParticle.position().x,-mParticle.position().y,mParticle.position().z);
+        C(-mParticle.position().x,mParticle.position().y,mParticle.position().z);
+        C(mParticle.position().x,-mParticle.position().y,mParticle.position().z);
+      }
+    }
+  }
+    
+  mParticle.position().set(frameCount, frameCount);
+  if(mParticle.position().x>=W/2 || mParticle.position().x<=-W/2)
+  {mParticle.position().x=a;}
+  
+  if(mParticle.position().y>=H/2 || mParticle.position().y<=-H/2)
+  {mParticle.position().y=a;}
+  
+  if(mParticle.position().z<=a)
+  {mParticle.position().z=-a;}
+}
+
+void C(float x, float y, float z)
+{
+  for(i = -.1; i<=.1; i++)
+  {
+    for(j = -.1; j<=.1; j++)
+    {
+      for(k = -.1; k<=.1; k-=a)
+      {
+        strokeWeight(a+-FPS/PI);
+        stroke(mParticle.position().x,mParticle.position().y,mParticle.position().z,ALPHA);
+        noFill();
+        rotateZ(radians(a*frameCount));
+        circle(-x,-y,-z);
+        circle(-x,y,-z);
+        circle(x,-y,-z);
+        circle(x,y,z);
+        stroke(mParticle.position().x,-mParticle.position().y,mParticle.position().z,ALPHA);
+        circle(-x,-y,z);
+        circle(-x,y,z);
+        circle(x,-y,z);
+      }
+    }
+  }
+}
